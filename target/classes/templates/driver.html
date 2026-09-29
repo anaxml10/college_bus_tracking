@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driver Telemetry Portal | ICCS CEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f4f6f9; }
+        header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        header h1 { font-size: 22px; font-weight: 600; }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 4px; background: rgba(0,0,0,0.15); transition: 0.3s; }
+        .nav-links a:hover { background: rgba(0,0,0,0.3); }
+        .container { max-width: 600px; margin: 40px auto; padding: 0 20px; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 20px; margin-bottom: 20px; color: #11998e; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        label { font-size: 13px; font-weight: 600; color: #666; display: block; margin-bottom: 5px; }
+        select, input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 6px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-primary { background: #11998e; color: white; }
+        .btn-primary:hover { background: #0e8076; }
+        .btn-danger { background: #ff4b5c; color: white; margin-top: 10px; }
+        .log-box { margin-top: 20px; background: #222; color: #00ff66; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 12px; height: 120px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ICCS Driver GPS Telemetry Unit</h1>
+        <div class="nav-links">
+            <a href="/student">Student</a>
+            <a href="/driver">Driver</a>
+            <a href="/admin">Admin</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Start Trip & Stream Location</h2>
+            
+            <div class="form-group">
+                <label for="busSelect">Assigned Vehicle</label>
+                <select id="busSelect">
+                    <option th:each="bus : ${buses}" th:value="${bus.busId}" th:text="${bus.busNumber + ' - ' + bus.driverName}"></option>
+                </select>
+            </div>
+
+            <button class="btn btn-primary" onclick="startTrip()">Initialize Trip & Start GPS Streaming</button>
+            <button class="btn btn-danger" onclick="stopTrip()">End Trip</button>
+
+            <div class="log-box" id="logBox">
+                System Initialized. Awaiting driver action...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var timerId = null;
+
+        function appendLog(msg) {
+            var box = document.getElementById("logBox");
+            box.innerHTML += "<br>> " + new Date().toLocaleTimeString() + " : " + msg;
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function sendCoordinates() {
+            var busId = document.getElementById("busSelect").value;
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coordinate ? position.coordinate.latitude : (10.3542 + (Math.random() * 0.01));
+                    var lng = position.coordinate ? position.coordinate.longitude : (76.2825 + (Math.random() * 0.01));
+
+                    fetch('/api/driver/update-location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ busId: busId, latitude: lat, longitude: lng })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        appendLog("GPS Streamed: Lat " + lat.toFixed(4) + ", Lng " + lng.toFixed(4));
+                    });
+                }, function(error) {
+                    // Fallback simulation if browser GPS blocked
+                    var lat = 10.3542 + (Math.random() * 0.005);
+                    var lng = 76.2825 + (Math.random() * 0.005);
+                    fetch('/api/driver/update-location', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ busId: busId, latitude: lat, longitude: lng })
+                    });
+                    appendLog("Simulated GPS Streamed: Lat " + lat.toFixed(4) + ", Lng " + lng.toFixed(4));
+                });
+            }
+        }
+
+        function startTrip() {
+            if (timerId !== null) return;
+            appendLog("Trip Initialized. GPS Streaming active.");
+            sendCoordinates();
+            timerId = setInterval(sendCoordinates, 4000);
+        }
+
+        function stopTrip() {
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                appendLog("Trip Ended. Telemetry Stopped.");
+            }
+        }
+    </script>
+</body>
+</html>

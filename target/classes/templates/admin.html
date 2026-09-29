@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Operations Control | ICCS CEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f4f6f9; }
+        header { background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        header h1 { font-size: 22px; font-weight: 600; }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15); transition: 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.3); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #2c5364; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 13px; font-weight: 600; color: #666; display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .btn { width: 100%; padding: 12px; background: #2c5364; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #0f2027; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px 15px; text-align: left; font-size: 13px; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; color: #555; font-weight: 600; }
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-active { background: #e3fcef; color: #00875a; }
+        .badge-inactive { background: #ffebe6; color: #de350b; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ICCS Transport Management Admin Console</h1>
+        <div class="nav-links">
+            <a href="/student">Student</a>
+            <a href="/driver">Driver</a>
+            <a href="/admin">Admin</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="grid-2">
+            <div class="card">
+                <h2>Add / Allocate Fleet</h2>
+                <form action="/admin/add-bus" method="POST">
+                    <div class="form-group">
+                        <label>Bus ID</label>
+                        <input type="text" name="busId" placeholder="e.g. BUS04" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Bus Registration Number</label>
+                        <input type="text" name="busNumber" placeholder="e.g. KL-08-AB-9999" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Assign Driver</label>
+                        <input type="text" name="driverName" placeholder="Driver Full Name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Route Allocation</label>
+                        <select name="routeName">
+                            <option th:each="route : ${routes}" th:value="${route.routeName}" th:text="${route.routeName}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Fee Status Verification</label>
+                        <select name="feeStatus">
+                            <option value="PAID">PAID</option>
+                            <option value="PENDING">PENDING</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn">Allocate Fleet & Driver</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Live Fleet Operations Monitor</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bus ID</th>
+                            <th>Number</th>
+                            <th>Driver</th>
+                            <th>Route</th>
+                            <th>Status</th>
+                            <th>Fee Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="bus : ${buses}">
+                            <td th:text="${bus.busId}"></td>
+                            <td th:text="${bus.busNumber}"></td>
+                            <td th:text="${bus.driverName}"></td>
+                            <td th:text="${bus.routeName}"></td>
+                            <td>
+                                <span th:text="${bus.status}" th:class="${bus.status == 'ON TRIP' ? 'badge badge-active' : 'badge badge-inactive'}"></span>
+                            </td>
+                            <td th:text="${bus.feeStatus}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Bus Tracking | ICCS CEM</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+        body { background-color: #f4f6f9; color: #333; }
+        header { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        header h1 { font-size: 22px; font-weight: 600; }
+        .nav-links a { color: #fff; text-decoration: none; margin-left: 20px; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 4px; background: rgba(255,255,255,0.15); transition: 0.3s; }
+        .nav-links a:hover { background: rgba(255,255,255,0.3); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #1e3c72; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 13px; font-weight: 600; color: #666; display: block; margin-bottom: 5px; }
+        select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .status-box { background: #eef2f7; padding: 15px; border-radius: 8px; margin-top: 15px; }
+        .status-box p { font-size: 13px; margin-bottom: 8px; color: #444; }
+        .status-box strong { color: #1e3c72; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+        .badge-active { background: #e3fcef; color: #00875a; }
+        .badge-inactive { background: #ffebe6; color: #de350b; }
+        #map { height: 500px; width: 100%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        @media(max-width: 768px) { .container { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>ICCS Smart Transit - Student Hub</h1>
+        <div class="nav-links">
+            <a href="/student">Student</a>
+            <a href="/driver">Driver</a>
+            <a href="/admin">Admin</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Select Route & Bus</h2>
+            <div class="form-group">
+                <label for="busSelect">Active Campus Buses</label>
+                <select id="busSelect" onchange="trackBus()">
+                    <option th:each="bus : ${buses}" th:value="${bus.busId}" th:text="${bus.busNumber + ' (' + bus.routeName + ')'}"></option>
+                </select>
+            </div>
+
+            <div class="status-box">
+                <p><strong>Driver:</strong> <span id="driverName">--</span></p>
+                <p><strong>Route:</strong> <span id="routeName">--</span></p>
+                <p><strong>Status:</strong> <span id="busStatus" class="badge">--</span></p>
+                <p><strong>Estimated Arrival (ETA):</strong> <span id="eta">--</span></p>
+                <p><strong>Bus Fee Status:</strong> <span id="feeStatus">--</span></p>
+            </div>
+        </div>
+
+        <div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map').setView([10.3542, 76.2825], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© ICCS Smart Transportation Systems'
+        }).addTo(map);
+
+        var busMarker = L.marker([10.3542, 76.2825]).addTo(map);
+
+        function trackBus() {
+            var busId = document.getElementById("busSelect").value;
+            fetch('/api/bus/' + busId)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("driverName").innerText = data.driverName;
+                    document.getElementById("routeName").innerText = data.routeName;
+                    
+                    var statusBadge = document.getElementById("busStatus");
+                    statusBadge.innerText = data.status;
+                    statusBadge.className = data.status === "ON TRIP" ? "badge badge-active" : "badge badge-inactive";
+                    
+                    document.getElementById("eta").innerText = data.estimatedTimeArrival;
+                    document.getElementById("feeStatus").innerText = data.feeStatus;
+
+                    var newLat = data.currentLat;
+                    var newLng = data.currentLng;
+                    
+                    busMarker.setLatLng([newLat, newLng]);
+                    map.panTo([newLat, newLng]);
+                    busMarker.bindPopup("<b>Bus " + data.busNumber + "</b><br>Driver: " + data.driverName).openPopup();
+                });
+        }
+
+        // Auto Refresh Telemetry
+        setInterval(trackBus, 3000);
+        window.onload = trackBus;
+    </script>
+</body>
+</html>

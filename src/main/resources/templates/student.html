@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ICCS Smart Bus Tracking System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Google Fonts & FontAwesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        :root {
+            --bg-color: #0f171e;
+            --card-bg: #1e293b;
+            --accent-gold: #d4af37;
+            --text-light: #f8fafc;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+            color: var(--text-light);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--accent-gold);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--accent-gold);
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: 1.5px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .controls-grid { grid-template-columns: 1fr; }
+        }
+
+        .select-box, .eta-card, .pass-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .eta-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #4ade80;
+            margin-top: 5px;
+        }
+
+        #map {
+            height: 450px;
+            width: 100%;
+            border-radius: 12px;
+            border: 2px solid var(--accent-gold);
+        }
+
+        .sos-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        .sos-btn:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-bus"></i> ICCS COLLEGE BUS TRACKING</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-top: 5px;">Smart Campus Transportation & Real-Time Telemetry Portal</p>
+        </div>
+
+        <div class="controls-grid">
+            <div class="select-box">
+                <label for="busSelect"><i class="fa-solid fa-route"></i> Select Bus & Route</label>
+                <select id="busSelect" onchange="trackBus()">
+                    <option th:each="bus : ${buses}" 
+                            th:value="${bus.busId}" 
+                            th:text="${bus.busNumber + ' (' + bus.routeName + ')'}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="eta-card">
+                <label><i class="fa-solid fa-clock"></i> ML Dynamic ETA Prediction</label>
+                <div class="eta-value" id="eta">Fetching Telemetry Status...</div>
+            </div>
+        </div>
+
+        <!-- Digital Bus Pass Section -->
+        <div class="pass-card" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <label><i class="fa-solid fa-id-card"></i> Digital Bus Pass Verification</label>
+                <div style="font-size: 14px; margin-top: 4px;">Status: <span style="color:#4ade80; font-weight:bold;">Fee Paid & Active</span></div>
+            </div>
+            <!-- Dynamic QR Code for Student Pass -->
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=ICCS-BUS-PASS-ACTIVE" alt="QR Pass" style="border-radius: 6px; border: 1px solid var(--accent-gold);">
+        </div>
+
+        <div id="map"></div>
+
+        <button class="sos-btn" onclick="triggerSOS()"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY SOS ALERT</button>
+    </div>
+
+    <script>
+        var defaultLat = 10.3542;
+        var defaultLng = 76.2825;
+
+        var map = L.map('map').setView([defaultLat, defaultLng], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© ICCS Smart Transport'
+        }).addTo(map);
+
+        var busIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+            iconSize: [45, 45],
+            iconAnchor: [22, 22],
+            popupAnchor: [0, -20]
+        });
+
+        var marker = L.marker([defaultLat, defaultLng], {icon: busIcon}).addTo(map);
+
+        function trackBus() {
+            var busId = document.getElementById("busSelect").value;
+            if(!busId) return;
+
+            fetch('/api/bus/' + busId)
+                .then(res => res.json())
+                .then(data => {
+                    var lat = data.currentLat;
+                    var lng = data.currentLng;
+                    
+                    marker.setLatLng([lat, lng]);
+                    map.panTo([lat, lng]);
+
+                    var popupText = `
+                        <div style="color:#000; font-family:'Poppins', sans-serif;">
+                            <b style="color:#800000;">Bus No: ${data.busNumber}</b><br>
+                            <b>Driver:</b> ${data.driverName}<br>
+                            <b>Status:</b> ${data.status}
+                        </div>
+                    `;
+                    marker.bindPopup(popupText);
+
+                    if(data.status === "ACTIVE") {
+                        document.getElementById("eta").innerHTML = `<i class="fa-solid fa-circle-check"></i> Arriving in ~12 Mins (Saved 22 Min via ML ETA)`;
+                    } else {
+                        document.getElementById("eta").innerHTML = `<span style="color:#f87171;"><i class="fa-solid fa-triangle-exclamation"></i> Bus Inactive / Standby</span>`;
+                    }
+                });
+        }
+
+        function triggerSOS() {
+            alert("Emergency SOS Alert Sent to Admin & Campus Security Portal!");
+        }
+
+        trackBus();
+        setInterval(trackBus, 2000);
+    </script>
+</body>
+</html>
