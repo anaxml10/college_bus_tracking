@@ -63,24 +63,29 @@
     </div>
 
     <script>
-        const routeStops = {
-            "THRISSUR": [
-                { name: "Thrissur Swaraj Round", coords: [10.5244, 76.2137] },
-                { name: "Ollur Junction", coords: [10.4704, 76.2335] },
-                { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] },
-                { name: "ICCS Campus", coords: [10.3391, 76.3051] }
-            ],
-            "CHALAKUDY": [
-                { name: "Chalakudy Railway Station", coords: [10.3072, 76.3353] },
-                { name: "Kodakara Junction", coords: [10.3662, 76.3082] },
-                { name: "ICCS Campus", coords: [10.3391, 76.3051] }
-            ],
-            "IRINJALAKUDA": [
-                { name: "Irinjalakuda Stand", coords: [10.3421, 76.2148] },
-                { name: "ICCS Campus", coords: [10.3391, 76.3051] }
-            ]
-        };
-
+       const routeStops = {
+    "THRISSUR": [
+        { name: "Thrissur Swaraj Round", coords: [10.5244, 76.2137] },
+        { name: "Ollur Junction", coords: [10.4704, 76.2335] },
+        { name: "Amballur Junction", coords: [10.4285, 76.2685] },
+        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, // ദേശീയപാതയിലെ (NH 544) കൃത്യം പുതൂക്കാട് ബസ് സ്റ്റോപ്പ്
+        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
+    ],
+    "CHALAKUDY": [
+        { name: "Chalakudy Railway Station", coords: [10.3072, 76.3353] },
+        { name: "Potta Junction", coords: [10.3288, 76.3262] },
+        { name: "Kodakara Junction", coords: [10.3662, 76.3082] },
+        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, // ദേശീയപാതയിലെ (NH 544) കൃത്യം പുതൂക്കാട് ബസ് സ്റ്റോപ്പ്
+        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
+    ],
+    "IRINJALAKUDA": [
+        { name: "Irinjalakuda Bus Stand", coords: [10.3421, 76.2148] },
+        { name: "Kallettumkara", coords: [10.3458, 76.2482] },
+        { name: "Mapranam", coords: [10.3685, 76.2312] },
+        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, 
+        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
+    ]
+};
         var stopLat = 10.3528, stopLng = 76.2818;
         var map = L.map('map').setView([10.3528, 76.2818], 12);
         var initialCenteringDone = false;
