@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Telemetry Station</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        body { font-family: sans-serif; background: #0f171e; color: #fff; padding: 20px; text-align: center; }
+        .card { background: #1e293b; padding: 25px; border-radius: 12px; max-width: 420px; margin: auto; border: 1px solid #d4af37; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        input, button { width: 100%; padding: 12px; margin: 10px 0; border-radius: 6px; box-sizing: border-box; border: 1px solid #475569; }
+        input { background: #0f172a; color: #fff; }
+        .btn-start { background: #22c55e; color: #000; font-weight: bold; border: none; cursor: pointer; font-size: 15px; }
+        .btn-breakdown { background: #ef4444; color: #fff; font-weight: bold; border: none; cursor: pointer; font-size: 14px; display: none; margin-top: 15px; }
+        .driver-info { background: rgba(212, 175, 55, 0.1); border: 1px solid #d4af37; padding: 10px; border-radius: 8px; margin-bottom: 15px; display: none; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2 style="color: #d4af37; margin-top: 0;"><i class="fa-solid fa-id-card-clip"></i> Driver Station</h2>
+        
+        <div id="loginSection">
+            <input type="text" id="busId" placeholder="Assigned Bus ID (e.g. BUS01)" required />
+            <input type="password" id="password" placeholder="Driver Access Password" required />
+            <button class="btn-start" onclick="startTracking()">LOGIN & START TRIP (GPS ON)</button>
+        </div>
+
+        <div id="driverCard" class="driver-info">
+            <div style="color:#d4af37; font-size:12px;">LOGGED IN DRIVER</div>
+            <div id="driverNameDisplay" style="font-size:18px; font-weight:bold; color:#fff;">-</div>
+            <div id="busIdDisplay" style="font-size:13px; color:#94a3b8;">-</div>
+        </div>
+
+        <div id="status" style="margin-top: 15px; font-weight: bold; color: #cbd5e1;">Status: Standby</div>
+
+        <button id="breakdownBtn" class="btn-breakdown" onclick="reportBreakdown()"><i class="fa-solid fa-triangle-exclamation"></i> REPORT VEHICLE BREAKDOWN / ACCIDENT</button>
+    </div>
+
+    <script>
+        var watchId = null;
+
+        function startTracking() {
+            var busId = document.getElementById("busId").value.trim();
+            var password = document.getElementById("password").value.trim();
+
+            if(!busId || !password) {
+                alert("Please enter Bus ID and Password!");
+                return;
+            }
+
+            if ("geolocation" in navigator) {
+                document.getElementById("status").innerHTML = "<span style='color:#f59e0b;'>Authenticating & Acquiring GPS...</span>";
+                
+                watchId = navigator.geolocation.watchPosition(function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lng = pos.coords.longitude;
+                    var speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0.0;
+
+                    fetch(`/api/driver/login-and-update?busId=${busId}&password=${password}&lat=${lat}&lng=${lng}&speed=${speed}`, { method: 'POST' })
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data.status === "SUCCESS") {
+                                document.getElementById("loginSection").style.display = "none";
+                                document.getElementById("driverCard").style.display = "block";
+                                document.getElementById("driverNameDisplay").innerText = data.driverName;
+                                document.getElementById("busIdDisplay").innerText = "Bus ID: " + busId;
+                                document.getElementById("breakdownBtn").style.display = "block";
+
+                                if (data.busStatus === "BREAKDOWN") {
+                                    document.getElementById("status").innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> BREAKDOWN REPORTED TO STUDENTS</span>`;
+                                } else {
+                                    document.getElementById("status").innerHTML = `<span style="color:#4ade80;"><i class="fa-solid fa-satellite-dish"></i> TRANSMITTING LIVE GPS (${busId})</span>`;
+                                }
+                            } else {
+                                alert(data.message);
+                                document.getElementById("status").innerHTML = `<span style="color:#f87171;">Authentication Failed</span>`;
+                            }
+                        });
+                }, function(err) {
+                    alert("GPS Error: " + err.message);
+                }, { enableHighAccuracy: true });
+            }
+        }
+
+        function reportBreakdown() {
+            var busId = document.getElementById("busId").value.trim();
+            var password = document.getElementById("password").value.trim();
+
+            if(confirm("Are you sure you want to report a Vehicle Breakdown? Students will be notified immediately.")) {
+                fetch(`/api/driver/breakdown?busId=${busId}&password=${password}`, { method: 'POST' })
+                    .then(res => res.text())
+                    .then(data => {
+                        if(data === "SUCCESS") {
+                            alert("Vehicle Breakdown Alert Transmitted!");
+                            document.getElementById("status").innerHTML = `<span style="color:#ef4444; font-size:16px;"><i class="fa-solid fa-triangle-exclamation"></i> VEHICLE BREAKDOWN REPORTED!</span>`;
+                        }
+                    });
+            }
+        }
+    </script>
+</body>
+</html>

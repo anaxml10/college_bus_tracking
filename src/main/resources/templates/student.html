@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ICCS Smart Bus Tracking System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #0f171e; color: #fff; margin: 0; padding: 20px; }
+        .card { background: #1e293b; padding: 20px; border-radius: 14px; max-width: 950px; margin: auto; border: 1px solid #d4af37; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; }
+        
+        .home-btn { position: absolute; top: 20px; left: 20px; background: #d4af37; color: #000; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 13px; display: flex; align-items: center; gap: 6px; }
+        .home-btn:hover { background: #f59e0b; }
+
+        .header { text-align: center; border-bottom: 2px solid #d4af37; padding-bottom: 10px; margin-bottom: 20px; margin-top: 10px; }
+        .header h1 { color: #d4af37; margin: 0; font-size: 24px; }
+
+        .breakdown-banner { background: #ef4444; color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; display: none; font-size: 15px; animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0.8; } }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        @media(max-width:600px){ .grid { grid-template-columns: 1fr; } .home-btn { position: relative; top: 0; left: 0; display: inline-block; margin-bottom: 10px; } }
+        .box { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+        select { width: 100%; padding: 10px; background: #0f172a; color: #fff; border-radius: 6px; border: 1px solid #d4af37; outline: none; }
+        #map { height: 440px; border-radius: 10px; border: 2px solid #d4af37; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
+
+        <div class="header">
+            <h1><i class="fa-solid fa-bus"></i> ICCS CAMPUS TRANSIT MONITORING</h1>
+            <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Real-Time College Bus Tracking & Dynamic ETA Portal</p>
+        </div>
+
+        <div id="breakdownAlert" class="breakdown-banner">
+            <i class="fa-solid fa-triangle-exclamation"></i> ALERT: VEHICLE BREAKDOWN / ACCIDENT REPORTED FOR THIS BUS! ALTERNATIVE BUS ARRANGED.
+        </div>
+
+        <div class="grid">
+            <div class="box">
+                <label style="color: #d4af37; font-weight: 600; display: block; margin-bottom: 6px;">
+                    <i class="fa-solid fa-route"></i> Select Bus & Route:
+                </label>
+                <select id="busSelect" onchange="trackBus()">
+                    <option th:each="bus : ${buses}" 
+                            th:value="${bus.busId}" 
+                            th:text="${bus.busId + ' - Live Corridor'}">
+                    </option>
+                </select>
+                <div style="margin-top:8px; font-size:13px; color:#cbd5e1;">Assigned Driver: <b id="driverName" style="color:#d4af37;">-</b></div>
+            </div>
+
+            <div class="box">
+                <div style="font-size: 14px;">Status: <b id="busStatus" style="color:#f87171;">INACTIVE (Standby)</b></div>
+                <div style="font-size: 14px; margin-top: 4px;">Live Speed: <b id="busSpeed" style="color:#60a5fa;">0.0 km/h</b></div>
+                <div style="font-size: 14px; margin-top: 4px;">Dynamic Arrival (ETA): <b id="eta" style="color:#4ade80;">Calculating...</b></div>
+            </div>
+        </div>
+
+        <div id="map"></div>
+    </div>
+
+    <script>
+        var studentLat = 10.3542;
+        var studentLng = 76.2825;
+
+        var map = L.map('map').setView([studentLat, studentLng], 13);
+
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            maxZoom: 18,
+            attribution: 'Tiles &copy; Esri'
+        }).addTo(map);
+
+        var busIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3448/3448339.png',
+            iconSize: [42, 42],
+            iconAnchor: [21, 21]
+        });
+
+        var studentIcon = L.icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        var busMarker = L.marker([studentLat, studentLng], {icon: busIcon}).addTo(map);
+        var studentMarker = L.marker([studentLat, studentLng], {icon: studentIcon}).addTo(map).bindPopup("Your Stop Location");
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(pos) {
+                studentLat = pos.coords.latitude;
+                studentLng = pos.coords.longitude;
+                studentMarker.setLatLng([studentLat, studentLng]);
+            });
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = (lat2-lat1) * Math.PI / 180;
+            var dLon = (lon2-lon1) * Math.PI / 180;
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function trackBus() {
+            var busSelect = document.getElementById("busSelect");
+            if (!busSelect || !busSelect.value) return;
+            var busId = busSelect.value;
+
+            fetch('/api/bus/' + busId)
+                .then(res => res.json())
+                .then(data => {
+                    if(!data || !data.latitude) return;
+
+                    var bLat = data.latitude;
+                    var bLng = data.longitude;
+                    
+                    busMarker.setLatLng([bLat, bLng]);
+                    document.getElementById("driverName").innerText = data.driverName || "Assigned Driver";
+
+                    if(data.status === "BREAKDOWN") {
+                        document.getElementById("breakdownAlert").style.display = "block";
+                        document.getElementById("busStatus").innerHTML = `<span style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> BREAKDOWN / EMERGENCY</span>`;
+                        document.getElementById("busSpeed").innerText = "0.0 km/h";
+                        document.getElementById("eta").innerText = "Transit Delayed (Breakdown)";
+                    } else if(data.status === "ACTIVE") {
+                        document.getElementById("breakdownAlert").style.display = "none";
+                        map.panTo([bLat, bLng]);
+                        document.getElementById("busStatus").innerHTML = `<span style="color:#4ade80;"><i class="fa-solid fa-signal"></i> ACTIVE (Live GPS)</span>`;
+                        document.getElementById("busSpeed").innerText = (data.speed ? data.speed.toFixed(1) : "0.0") + " km/h";
+
+                        var dist = calculateDistance(bLat, bLng, studentLat, studentLng);
+                        var avgSpeed = data.speed > 5 ? data.speed : 30;
+                        var mins = Math.round((dist / avgSpeed) * 60);
+
+                        document.getElementById("eta").innerText = `${mins} mins away (${dist.toFixed(1)} km)`;
+                    } else {
+                        document.getElementById("breakdownAlert").style.display = "none";
+                        document.getElementById("busStatus").innerHTML = `<span style="color:#f87171;"><i class="fa-solid fa-circle-pause"></i> INACTIVE (Standby)</span>`;
+                        document.getElementById("busSpeed").innerText = "0.0 km/h";
+                        document.getElementById("eta").innerText = "Bus Trip Not Started Yet";
+                    }
+                });
+        }
+
+        trackBus();
+        setInterval(trackBus, 3000);
+    </script>
+</body>
+</html>

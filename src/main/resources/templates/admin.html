@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Fleet Portal - ICCS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; background: #0f171e; color: #fff; padding: 20px; }
+        .container { max-width: 850px; margin: auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #d4af37; }
+        h2 { color: #d4af37; text-align: center; margin-top: 0; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #cbd5e1; }
+        input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
+        button { background: #d4af37; color: #000; padding: 12px; width: 100%; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        button:hover { background: #f59e0b; }
+        table { width: 100%; margin-top: 25px; border-collapse: collapse; }
+        th, td { border: 1px solid #334155; padding: 10px; text-align: left; }
+        th { background: #0f172a; color: #d4af37; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Campus Dispatch Admin Portal</h2>
+        
+        <form action="/admin/add-bus" method="POST">
+            <div class="form-group">
+                <label>Bus ID (e.g. BUS01):</label>
+                <input type="text" name="busId" placeholder="Enter Bus Number / ID" required />
+            </div>
+            <div class="form-group">
+                <label>Driver Name:</label>
+                <input type="text" name="driverName" placeholder="Enter Assigned Driver Name" required />
+            </div>
+            <div class="form-group">
+                <label>Driver Security Password:</label>
+                <input type="password" name="password" placeholder="Set Password for Driver Login" required />
+            </div>
+            <button type="submit">REGISTER BUS &amp; ASSIGN DRIVER</button>
+        </form>
+
+        <h3 style="color:#d4af37; margin-top:30px;">Registered Fleet & Driver Roster</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bus ID</th>
+                    <th>Driver Name</th>
+                    <th>Password</th>
+                    <th>Live Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="bus : ${buses}">
+                    <td th:text="${bus.busId}">BUS01</td>
+                    <td th:text="${bus.driverName}">Santhosh</td>
+                    <td th:text="${bus.password}">1234</td>
+                    <td th:text="${bus.status}" th:style="${bus.status == 'ACTIVE' ? 'color:#4ade80;font-weight:bold;' : (bus.status == 'BREAKDOWN' ? 'color:#ef4444;font-weight:bold;' : 'color:#94a3b8;')}">INACTIVE</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ICCS Bus Tracking - Welcome</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        :root {
+            --bg-color: #0f171e;
+            --card-bg: #1e293b;
+            --accent-gold: #d4af37;
+            --text-light: #f8fafc;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-color);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .portal-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+        }
+        h1 {
+            font-family: 'Cinzel', serif;
+            color: var(--accent-gold);
+            font-size: 24px;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+        p.subtitle {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid var(--accent-gold);
+        }
+        .btn-student { background: var(--accent-gold); color: #000; }
+        .btn-driver { background: #1e293b; color: var(--accent-gold); }
+        .btn-admin { background: rgba(212, 175, 55, 0.1); color: #fff; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="portal-card">
+        <i class="fa-solid fa-bus-simple" style="font-size: 50px; color: var(--accent-gold); margin-bottom: 15px;"></i>
+        <h1>ICCS BUS TRACKING SYSTEM</h1>
+        <p class="subtitle">Smart Campus Transportation & Real-Time Telemetry Portal</p>
+        
+        <div class="btn-group">
+            <a href="/student" class="btn btn-student"><i class="fa-solid fa-user-graduate"></i> Student Portal</a>
+            <a href="/driver" class="btn btn-driver"><i class="fa-solid fa-id-card"></i> Driver Panel</a>
+            <a href="/admin" class="btn btn-admin"><i class="fa-solid fa-user-gear"></i> Admin Management</a>
+        </div>
+    </div>
+</body>
+</html>
