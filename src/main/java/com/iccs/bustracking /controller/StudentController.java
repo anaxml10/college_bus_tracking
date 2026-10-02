@@ -7,22 +7,26 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Controller
 public class StudentController {
 
     @GetMapping("/student")
     public String studentPage(Model model) {
-        model.addAttribute("buses", new ArrayList<>(AdminController.busStore.values()));
+        List<Bus> busList = new ArrayList<>();
+        if (AdminController.busStore != null && !AdminController.busStore.isEmpty()) {
+            busList.addAll(AdminController.busStore.values());
+        }
+        model.addAttribute("buses", busList);
         return "student";
     }
 
     @GetMapping("/api/bus/{busId}")
     @ResponseBody
-    public ResponseEntity<?> getBusDetails(@PathVariable String busId) {
-        Bus bus = AdminController.busStore.get(busId);
-        if (bus != null) {
-            return ResponseEntity.ok(bus);
+    public ResponseEntity<Bus> getBusDetails(@PathVariable String busId) {
+        if (AdminController.busStore != null && AdminController.busStore.containsKey(busId)) {
+            return ResponseEntity.ok(AdminController.busStore.get(busId));
         }
         return ResponseEntity.notFound().build();
     }

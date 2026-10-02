@@ -55,7 +55,7 @@
             <div class="box">
                 <div>Status: <b id="busStatus" style="color:#f87171;">INACTIVE</b></div>
                 <div style="margin-top: 8px;">Speed: <b id="busSpeed" style="color:#60a5fa;">0.0 km/h</b></div>
-                <div style="margin-top: 8px;">ETA: <b id="eta" style="color:#4ade80;">Waiting for GPS...</b></div>
+                <div style="margin-top: 8px;">ETA: <b id="eta" style="color:#4ade80;">Waiting for Live GPS...</b></div>
             </div>
         </div>
 
@@ -83,6 +83,7 @@
 
         var stopLat = 10.3528, stopLng = 76.2818;
         var map = L.map('map').setView([10.3528, 76.2818], 12);
+        var initialCenteringDone = false;
 
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 }).addTo(map);
 
@@ -106,17 +107,29 @@
                 stopSelect.appendChild(opt);
             });
 
+            initialCenteringDone = false;
             updateStopLocation();
         }
 
         function updateStopLocation() {
             var stopSelect = document.getElementById("stopSelect");
-            if(!stopSelect.value) return;
+            if(!stopSelect || !stopSelect.value) return;
             var coords = stopSelect.value.split(",");
             stopLat = parseFloat(coords[0]);
             stopLng = parseFloat(coords[1]);
             stopMarker.setLatLng([stopLat, stopLng]);
             trackBus();
+        }
+
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = (lat2-lat1) * Math.PI / 180;
+            var dLon = (lon2-lon1) * Math.PI / 180;
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
         }
 
         function trackBus() {
@@ -128,22 +141,41 @@
                 .then(data => {
                     if(!data) return;
 
-                    if (data.latitude && data.longitude && data.latitude !== 0) {
-                        busMarker.setLatLng([data.latitude, data.longitude]);
+                    var bLat = data.latitude;
+                    var bLng = data.longitude;
+
+                    if (bLat && bLng && bLat !== 0) {
+                        busMarker.setLatLng([bLat, bLng]);
+
+                        // ഡ്രൈവറുടെ റിയൽ ലൈവ് ജിപിഎസ് ലൊക്കേഷനിലേക്ക് സ്ട്രൈറ്റ് ആയും കൃത്യമായും മാപ്പ് ഫോക്കസ് ചെയ്യുന്നു
+                        if (!initialCenteringDone) {
+                            map.setView([bLat, bLng], 14);
+                            initialCenteringDone = true;
+                        }
                     }
 
                     if(data.status === "BREAKDOWN") {
                         document.getElementById("breakdownAlert").style.display = "block";
                         document.getElementById("busStatus").innerHTML = "<span style='color:#ef4444;'>BREAKDOWN</span>";
+                        document.getElementById("eta").innerText = "Transit Delayed";
                     } else if(data.status === "ACTIVE") {
                         document.getElementById("breakdownAlert").style.display = "none";
                         document.getElementById("busStatus").innerHTML = "<span style='color:#4ade80;'>ACTIVE</span>";
                         document.getElementById("busSpeed").innerText = (data.speed || 0).toFixed(1) + " km/h";
+
+                        if (bLat !== 0 && bLng !== 0) {
+                            var dist = calculateDistance(bLat, bLng, stopLat, stopLng);
+                            var speed = data.speed > 5 ? data.speed : 30;
+                            var mins = Math.round((dist / speed) * 60);
+                            document.getElementById("eta").innerText = dist < 0.2 ? "Arrived at Stop" : mins + " mins (" + dist.toFixed(1) + " km)";
+                        }
                     } else {
                         document.getElementById("breakdownAlert").style.display = "none";
                         document.getElementById("busStatus").innerHTML = "<span style='color:#f87171;'>INACTIVE</span>";
+                        document.getElementById("eta").innerText = "Trip Not Started";
                     }
-                });
+                })
+                .catch(err => console.log(err));
         }
 
         onBusChange();
