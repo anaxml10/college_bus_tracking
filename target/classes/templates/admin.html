@@ -1,62 +1,147 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Admin Fleet Portal - ICCS</title>
+    <title>ICCS Admin Portal</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
     <style>
-        body { font-family: sans-serif; background: #0f171e; color: #fff; padding: 20px; }
-        .container { max-width: 850px; margin: auto; background: #1e293b; padding: 25px; border-radius: 12px; border: 1px solid #d4af37; }
-        h2 { color: #d4af37; text-align: center; margin-top: 0; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; color: #cbd5e1; }
-        input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; box-sizing: border-box; }
-        button { background: #d4af37; color: #000; padding: 12px; width: 100%; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; }
-        button:hover { background: #f59e0b; }
-        table { width: 100%; margin-top: 25px; border-collapse: collapse; }
-        th, td { border: 1px solid #334155; padding: 10px; text-align: left; }
-        th { background: #0f172a; color: #d4af37; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #090d16; color: #f8fafc; margin: 0; padding: 30px 15px; min-height: 100vh; display: flex; justify-content: center; }
+        .dashboard { width: 100%; max-width: 1100px; background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+        .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 25px; }
+        .home-btn { background: linear-gradient(135deg, #d4af37, #f59e0b); color: #000; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 14px; }
+        .header-title h1 { margin: 0; font-size: 24px; font-weight: 800; color: #d4af37; }
+        .form-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 16px; padding: 22px; margin-bottom: 30px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; background: #090d16; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+        .submit-btn { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 22px; }
+        .table-container { background: rgba(15, 23, 42, 0.8); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 16px; font-size: 13px; font-weight: 700; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        td { padding: 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .delete-btn { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Campus Dispatch Admin Portal</h2>
-        
-        <form action="/admin/add-bus" method="POST">
-            <div class="form-group">
-                <label>Bus ID (e.g. BUS01):</label>
-                <input type="text" name="busId" placeholder="Enter Bus Number / ID" required />
-            </div>
-            <div class="form-group">
-                <label>Driver Name:</label>
-                <input type="text" name="driverName" placeholder="Enter Assigned Driver Name" required />
-            </div>
-            <div class="form-group">
-                <label>Driver Security Password:</label>
-                <input type="password" name="password" placeholder="Set Password for Driver Login" required />
-            </div>
-            <button type="submit">REGISTER BUS &amp; ASSIGN DRIVER</button>
-        </form>
 
-        <h3 style="color:#d4af37; margin-top:30px;">Registered Fleet & Driver Roster</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Bus ID</th>
-                    <th>Driver Name</th>
-                    <th>Password</th>
-                    <th>Live Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="bus : ${buses}">
-                    <td th:text="${bus.busId}">BUS01</td>
-                    <td th:text="${bus.driverName}">Santhosh</td>
-                    <td th:text="${bus.password}">1234</td>
-                    <td th:text="${bus.status}" th:style="${bus.status == 'ACTIVE' ? 'color:#4ade80;font-weight:bold;' : (bus.status == 'BREAKDOWN' ? 'color:#ef4444;font-weight:bold;' : 'color:#94a3b8;')}">INACTIVE</td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="dashboard">
+        <div class="top-nav">
+            <div class="header-title">
+                <h1><i class="fa-solid fa-shield-halved"></i> ICCS FLEET MANAGEMENT CONTROL</h1>
+            </div>
+            <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
+        </div>
+
+        <div class="form-card">
+            <form id="addBusForm" onsubmit="addBusAsync(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label>Bus ID</label>
+                        <input type="text" id="busId" placeholder="e.g. BUS01" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Reg Number</label>
+                        <input type="text" id="regNumber" placeholder="e.g. KL 08 AB 1234" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Route</label>
+                        <select id="route" required>
+                            <option value="THRISSUR">Thrissur Route</option>
+                            <option value="CHALAKUDY">Chalakudy Route</option>
+                            <option value="IRINJALAKUDA">Irinjalakuda Route</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Driver Name</label>
+                        <input type="text" id="driverName" placeholder="e.g. Santhosh" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="e.g. 1234" required>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn"><i class="fa-solid fa-plus-circle"></i> Add Bus</button>
+            </form>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Bus ID</th>
+                        <th>Reg Number</th>
+                        <th>Route</th>
+                        <th>Driver</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="busTableBody">
+                    <tr th:each="bus : ${buses}" th:id="'row-' + ${bus.busId}">
+                        <td th:text="${bus.busId}" style="font-weight: bold; color: #d4af37;">BUS01</td>
+                        <td th:text="${bus.regNumber}">KL 08 AB 1234</td>
+                        <td th:text="${bus.route}" style="color: #60a5fa;">THRISSUR</td>
+                        <td th:text="${bus.driverName}">Santhosh</td>
+                        <td th:text="${bus.status}">INACTIVE</td>
+                        <td>
+                            <button th:onclick="'deleteBusAsync(\'' + ${bus.busId} + '\')'" class="delete-btn">Remove</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <script>
+        function addBusAsync(event) {
+            event.preventDefault();
+
+            var busId = document.getElementById("busId").value.trim();
+            var regNumber = document.getElementById("regNumber").value.trim();
+            var route = document.getElementById("route").value;
+            var driverName = document.getElementById("driverName").value.trim();
+            var password = document.getElementById("password").value.trim();
+
+            var params = new URLSearchParams();
+            params.append("busId", busId);
+            params.append("regNumber", regNumber);
+            params.append("route", route);
+            params.append("driverName", driverName);
+            params.append("password", password);
+
+            fetch('/admin/addBus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(response => response.json())
+            .then(data => {
+                location.reload();
+            });
+        }
+
+        function deleteBusAsync(busId) {
+            if(!confirm("Remove bus " + busId + "?")) return;
+
+            var params = new URLSearchParams();
+            params.append("busId", busId);
+
+            fetch('/admin/deleteBus', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            })
+            .then(res => {
+                if(res.ok) {
+                    var row = document.getElementById("row-" + busId);
+                    if (row) row.remove();
+                }
+            });
+        }
+    </script>
 </body>
 </html>

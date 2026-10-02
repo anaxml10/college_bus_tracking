@@ -1,86 +1,53 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>ICCS Bus Tracking - Welcome</title>
+    <title>ICCS College Bus Tracking Portal</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
     <style>
-        :root {
-            --bg-color: #0f171e;
-            --card-bg: #1e293b;
-            --accent-gold: #d4af37;
-            --text-light: #f8fafc;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            background: var(--bg-color);
-            color: var(--text-light);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .portal-card {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-        }
-        h1 {
-            font-family: 'Cinzel', serif;
-            color: var(--accent-gold);
-            font-size: 24px;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-        p.subtitle {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-bottom: 30px;
-        }
-        .btn-group {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            padding: 14px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: 1px solid var(--accent-gold);
-        }
-        .btn-student { background: var(--accent-gold); color: #000; }
-        .btn-driver { background: #1e293b; color: var(--accent-gold); }
-        .btn-admin { background: rgba(212, 175, 55, 0.1); color: #fff; }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #090d16; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { width: 100%; max-width: 800px; text-align: center; }
+        .title { color: #d4af37; font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+        .subtitle { color: #94a3b8; font-size: 14px; margin-bottom: 35px; }
+
+        .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .portal-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 16px; padding: 30px 20px; text-decoration: none; color: #fff; transition: all 0.3s ease; }
+        .portal-card:hover { transform: translateY(-5px); border-color: #d4af37; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2); }
+        .portal-card i { font-size: 38px; color: #d4af37; margin-bottom: 15px; display: block; }
+        .portal-card h3 { margin: 0; font-size: 18px; font-weight: 700; }
+        .portal-card p { margin-top: 8px; font-size: 12px; color: #94a3b8; }
     </style>
 </head>
 <body>
-    <div class="portal-card">
-        <i class="fa-solid fa-bus-simple" style="font-size: 50px; color: var(--accent-gold); margin-bottom: 15px;"></i>
-        <h1>ICCS BUS TRACKING SYSTEM</h1>
-        <p class="subtitle">Smart Campus Transportation & Real-Time Telemetry Portal</p>
-        
-        <div class="btn-group">
-            <a href="/student" class="btn btn-student"><i class="fa-solid fa-user-graduate"></i> Student Portal</a>
-            <a href="/driver" class="btn btn-driver"><i class="fa-solid fa-id-card"></i> Driver Panel</a>
-            <a href="/admin" class="btn btn-admin"><i class="fa-solid fa-user-gear"></i> Admin Management</a>
+
+    <div class="container">
+        <div class="title"><i class="fa-solid fa-bus"></i> ICCS COLLEGE BUS TRACKING SYSTEM</div>
+        <div class="subtitle">Select your portal to continue</div>
+
+        <div class="cards-grid">
+            <a href="/admin" class="portal-card">
+                <i class="fa-solid fa-user-shield"></i>
+                <h3>Admin Portal</h3>
+                <p>Register buses, assign drivers & route management</p>
+            </a>
+
+            <a href="/driver" class="portal-card">
+                <i class="fa-solid fa-id-card-clip"></i>
+                <h3>Driver Console</h3>
+                <p>Start trip & broadcast live GPS location</p>
+            </a>
+
+            <a href="/student" class="portal-card">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <h3>Student Portal</h3>
+                <p>Track live bus location & view route ETA</p>
+            </a>
         </div>
     </div>
+
 </body>
 </html>

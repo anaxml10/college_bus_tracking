@@ -2,99 +2,49 @@ package com.iccs.bustracking.model;
 
 public class Bus {
     private String busId;
-    private String busNumber;
     private String driverName;
-    private String routeName;
-    private double currentLat;
-    private double currentLng;
-    private String status;
-    private String estimatedTimeArrival;
-    private String feeStatus;
+    private String password;
+    private String regNumber;
+    private String route;
+    private double latitude = 0.0;  // വെറുതെ തൃശ്ശൂർ കാണിക്കാതിരിക്കാൻ 0 നൽകുന്നു
+    private double longitude = 0.0;
+    private double speed = 0.0;
+    private String status = "INACTIVE";
 
-    public Bus() {
-    }
+    public Bus() {}
 
-    public Bus(String busId, String busNumber, String driverName, String routeName, double currentLat, double currentLng, String status, String estimatedTimeArrival, String feeStatus) {
+    public Bus(String busId, String driverName, String password, String regNumber, String route) {
         this.busId = busId;
-        this.busNumber = busNumber;
         this.driverName = driverName;
-        this.routeName = routeName;
-        this.currentLat = currentLat;
-        this.currentLng = currentLng;
-        this.status = status;
-        this.estimatedTimeArrival = estimatedTimeArrival;
-        this.feeStatus = feeStatus;
+        this.password = password;
+        this.regNumber = regNumber;
+        this.route = route;
     }
 
-    public String getBusId() {
-        return busId;
-    }
+    public String getBusId() { return busId; }
+    public void setBusId(String busId) { this.busId = busId; }
 
-    public void setBusId(String busId) {
-        this.busId = busId;
-    }
+    public String getDriverName() { return driverName; }
+    public void setDriverName(String driverName) { this.driverName = driverName; }
 
-    public String getBusNumber() {
-        return busNumber;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setBusNumber(String busNumber) {
-        this.busNumber = busNumber;
-    }
+    public String getRegNumber() { return regNumber; }
+    public void setRegNumber(String regNumber) { this.regNumber = regNumber; }
 
-    public String getDriverName() {
-        return driverName;
-    }
+    public String getRoute() { return route; }
+    public void setRoute(String route) { this.route = route; }
 
-    public void setDriverName(String driverName) {
-        this.driverName = driverName;
-    }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public String getRouteName() {
-        return routeName;
-    }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    public void setRouteName(String routeName) {
-        this.routeName = routeName;
-    }
+    public double getSpeed() { return speed; }
+    public void setSpeed(double speed) { this.speed = speed; }
 
-    public double getCurrentLat() {
-        return currentLat;
-    }
-
-    public void setCurrentLat(double currentLat) {
-        this.currentLat = currentLat;
-    }
-
-    public double getCurrentLng() {
-        return currentLng;
-    }
-
-    public void setCurrentLng(double currentLng) {
-        this.currentLng = currentLng;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getEstimatedTimeArrival() {
-        return estimatedTimeArrival;
-    }
-
-    public void setEstimatedTimeArrival(String estimatedTimeArrival) {
-        this.estimatedTimeArrival = estimatedTimeArrival;
-    }
-
-    public String getFeeStatus() {
-        return feeStatus;
-    }
-
-    public void setFeeStatus(String feeStatus) {
-        this.feeStatus = feeStatus;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

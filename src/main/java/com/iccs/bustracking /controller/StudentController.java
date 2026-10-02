@@ -1,31 +1,29 @@
 package com.iccs.bustracking.controller;
 
-import com.iccs.bustracking.model.LocationUpdate;
+import com.iccs.bustracking.model.Bus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @Controller
 public class StudentController {
 
     @GetMapping("/student")
     public String studentPage(Model model) {
-        List<LocationUpdate> busList = new ArrayList<>(DriverController.liveLocations.values());
-        
-        if (busList.isEmpty()) {
-            busList.add(new LocationUpdate("BUS01", 10.3542, 76.2825, "INACTIVE", "1234"));
-        }
-        
-        model.addAttribute("buses", busList);
+        model.addAttribute("buses", new ArrayList<>(AdminController.busStore.values()));
         return "student";
     }
 
     @GetMapping("/api/bus/{busId}")
     @ResponseBody
-    public LocationUpdate getBusLocation(@PathVariable String busId) {
-        return DriverController.liveLocations.getOrDefault(busId, new LocationUpdate(busId, 10.3542, 76.2825, "INACTIVE", "1234"));
+    public ResponseEntity<?> getBusDetails(@PathVariable String busId) {
+        Bus bus = AdminController.busStore.get(busId);
+        if (bus != null) {
+            return ResponseEntity.ok(bus);
+        }
+        return ResponseEntity.notFound().build();
     }
 }
