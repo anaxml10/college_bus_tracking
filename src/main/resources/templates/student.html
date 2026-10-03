@@ -16,11 +16,30 @@
         .card { background: rgba(30, 41, 59, 0.75); padding: 25px; border-radius: 20px; max-width: 950px; margin: auto; border: 1px solid rgba(212, 175, 55, 0.3); position: relative; }
         .home-btn { position: absolute; top: 20px; left: 20px; background: #d4af37; color: #000; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
         .header { text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 20px; }
+        
+        /* Breakdown Red Banner Style with Blinking effect */
+        .breakdown-banner { 
+            background: #ef4444; 
+            color: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+            font-weight: 800; 
+            font-size: 16px;
+            margin-bottom: 20px; 
+            display: none; 
+            border: 2px solid #fff;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+            animation: blinker 1.5s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0.8; box-shadow: 0 0 5px rgba(239, 68, 68, 0.3); }
+        }
+
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .box { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 12px; }
         select { width: 100%; padding: 10px; background: #090d16; color: #fff; border-radius: 8px; border: 1px solid #d4af37; margin-bottom: 10px; }
         #map { height: 400px; border-radius: 14px; border: 2px solid #d4af37; margin-top: 15px; }
-        .breakdown-banner { background: #ef4444; color: white; padding: 12px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 15px; display: none; }
     </style>
 </head>
 <body>
@@ -32,8 +51,10 @@
             <h1 style="color: #d4af37; margin: 0; font-size: 22px;"><i class="fa-solid fa-bus"></i> STUDENT BUS TRACKING</h1>
         </div>
 
+        <!-- Breakdown Alert Banner -->
         <div id="breakdownAlert" class="breakdown-banner">
-            <i class="fa-solid fa-triangle-exclamation"></i> ALERT: VEHICLE BREAKDOWN REPORTED FOR THIS BUS!
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 20px; margin-right: 10px;"></i> 
+            ALERT: VEHICLE BREAKDOWN REPORTED FOR THIS BUS! EXPECT DELAYS.
         </div>
 
         <div class="grid">
@@ -143,6 +164,7 @@
                     if (!initialCenteringDone) { map.setView([bLat, bLng], 14); initialCenteringDone = true; }
                 }
 
+                // Breakdown Banner Logic
                 if(data.status === "BREAKDOWN") {
                     document.getElementById("breakdownAlert").style.display = "block";
                     document.getElementById("busStatus").innerHTML = "<span style='color:#ef4444;'>BREAKDOWN</span>";
