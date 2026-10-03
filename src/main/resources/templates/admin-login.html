@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Login - ICCS System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: #090d16; color: #fff; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .login-card { background: rgba(30, 41, 59, 0.75); padding: 40px; border-radius: 20px; text-align: center; border: 1px solid rgba(212, 175, 55, 0.3); }
+        input { width: 100%; padding: 12px; margin: 15px 0; background: #0f172a; border: 1px solid #d4af37; color: white; border-radius: 8px; }
+        button { background: #d4af37; color: black; padding: 12px; width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2 style="color: #d4af37;"><i class="fa-solid fa-lock"></i> ADMIN LOGIN</h2>
+        <p style="color: #ef4444;" th:if="${param.error}">Incorrect Password!</p>
+        <form action="/admin/authenticate" method="POST">
+            <input type="password" name="password" placeholder="Enter Admin Password" required>
+            <button type="submit">LOGIN SECURELY</button>
+        </form>
+        <br><a href="/" style="color: gray; font-size: 14px; text-decoration: none;">Back to Home</a>
+    </div>
+</body>
+</html>

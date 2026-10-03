@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class AdminController {
 
     public static final Map<String, Bus> busStore = new ConcurrentHashMap<>();
+    public static final Map<String, List<String>> busStopsMap = new ConcurrentHashMap<>();
 
     @GetMapping("/admin")
     public String adminPage(Model model) {
@@ -32,12 +33,20 @@ public class AdminController {
                                     @RequestParam(required = false, defaultValue = "Driver") String driverName,
                                     @RequestParam(required = false, defaultValue = "1234") String password,
                                     @RequestParam(required = false, defaultValue = "KL-01") String regNumber,
-                                    @RequestParam(required = false, defaultValue = "THRISSUR") String route) {
+                                    @RequestParam(required = false, defaultValue = "THRISSUR") String route,
+                                    @RequestParam(value = "stops", required = false) List<String> stops) {
         try {
             String cleanId = busId.trim();
             Bus bus = new Bus(cleanId, driverName.trim(), password.trim(), regNumber.trim(), route.trim());
             bus.setStatus("INACTIVE");
             busStore.put(cleanId, bus);
+            
+            if (stops != null) {
+                busStopsMap.put(cleanId, stops);
+            } else {
+                busStopsMap.put(cleanId, new ArrayList<>());
+            }
+            
             return ResponseEntity.ok().body("{\"status\":\"SUCCESS\"}");
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("{\"status\":\"ERROR\"}");
@@ -49,6 +58,7 @@ public class AdminController {
     public ResponseEntity<?> deleteBus(@RequestParam String busId) {
         if (busId != null) {
             busStore.remove(busId.trim());
+            busStopsMap.remove(busId.trim());
         }
         return ResponseEntity.ok().body("{\"status\":\"SUCCESS\"}");
     }

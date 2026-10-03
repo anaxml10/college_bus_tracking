@@ -10,161 +10,167 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: #090d16; color: #f8fafc; margin: 0; padding: 30px 15px; min-height: 100vh; display: flex; justify-content: center; }
-        .dashboard { width: 100%; max-width: 1100px; background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px; padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+        
+        /* Modal Popup Style */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.95); backdrop-filter: blur(10px); z-index: 999; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(212, 175, 55, 0.4); padding: 35px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .login-box input { width: 100%; padding: 12px; background: #090d16; border: 1px solid #d4af37; color: white; border-radius: 8px; margin: 15px 0; outline: none; font-size: 14px; text-align: center; }
+        .login-box button { background: linear-gradient(135deg, #d4af37, #f59e0b); color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px; }
+
+        .dashboard { width: 100%; max-width: 1100px; background: rgba(30, 41, 59, 0.75); border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 20px; padding: 30px; }
         .top-nav { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px; margin-bottom: 25px; }
-        .home-btn { background: linear-gradient(135deg, #d4af37, #f59e0b); color: #000; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 14px; }
-        .header-title h1 { margin: 0; font-size: 24px; font-weight: 800; color: #d4af37; }
-        .form-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 16px; padding: 22px; margin-bottom: 30px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
+        .home-btn { background: linear-gradient(135deg, #d4af37, #f59e0b); color: #000; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
+        .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .input-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
         .input-group input, .input-group select { width: 100%; padding: 12px; background: #090d16; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #d4af37; }
+        .checkbox-grid label { font-size: 13px; font-weight: normal; color: white; cursor: pointer; }
         .submit-btn { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 22px; }
-        .table-container { background: rgba(15, 23, 42, 0.8); border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); overflow: hidden; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 16px; font-size: 13px; font-weight: 700; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 30px; }
+        th { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 16px; font-size: 13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
         td { padding: 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .delete-btn { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
-        .status-active { color: #4ade80; font-weight: bold; }
-        .status-inactive { color: #f87171; font-weight: bold; }
-        .status-breakdown { color: #f59e0b; font-weight: bold; }
     </style>
 </head>
 <body>
 
+    <!-- Admin Password Modal -->
+    <div id="loginOverlay" class="login-overlay">
+        <div class="login-box">
+            <h2 style="color: #d4af37; margin-top:0;"><i class="fa-solid fa-lock"></i> ADMIN ACCESS</h2>
+            <p style="font-size: 13px; color: #cbd5e1;">Enter Admin Password to continue</p>
+            <input type="password" id="adminPasswordInput" placeholder="Password" autocomplete="new-password">
+            <button onclick="checkAdminPassword()">LOGIN</button>
+            <div id="loginErr" style="color: #ef4444; font-size: 12px; margin-top: 10px; display: none;">Incorrect Password!</div>
+        </div>
+    </div>
+
     <div class="dashboard">
         <div class="top-nav">
-            <div class="header-title">
-                <h1><i class="fa-solid fa-shield-halved"></i> ADMIN FLEET MANAGEMENT</h1>
-            </div>
+            <h1 style="margin: 0; color: #d4af37; font-size: 22px;"><i class="fa-solid fa-shield-halved"></i> ADMIN FLEET MANAGEMENT</h1>
             <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
         </div>
 
-        <div class="form-card">
-            <form id="addBusForm" onsubmit="addBusAsync(event)" autocomplete="off">
-    <div class="form-grid">
-        <div class="input-group">
-            <label>Bus ID</label>
-            <input type="text" id="busId" name="bus_id_custom" placeholder="e.g. BUS01" value="" autocomplete="new-password" required>
-        </div>
-        <div class="input-group">
-            <label>Reg Number</label>
-            <input type="text" id="regNumber" name="reg_num_custom" placeholder="e.g. KL 08 AB 1234" value="" autocomplete="off" required>
-        </div>
-        <div class="input-group">
-            <label>Route</label>
-            <select id="route" required>
-                <option value="THRISSUR">Thrissur Route</option>
-                <option value="CHALAKUDY">Chalakudy Route</option>
-                <option value="IRINJALAKUDA">Irinjalakuda Route</option>
-            </select>
-        </div>
-        <div class="input-group">
-            <label>Driver Name</label>
-            <input type="text" id="driverName" name="driver_name_custom" placeholder="e.g. Santhosh" value="" autocomplete="off" required>
-        </div>
-        <div class="input-group">
-            <label>Password</label>
-            <input type="password" id="password" name="bus_pwd_custom" placeholder="e.g. 1234" value="" autocomplete="new-password" required>
-        </div>
-    </div>
-    <button type="submit" class="submit-btn"><i class="fa-solid fa-plus-circle"></i> Add Bus</button>
-</form>
-        </div>
+        <form id="addBusForm" onsubmit="addBusAsync(event)" autocomplete="off">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>Bus ID</label>
+                    <input type="text" id="busId" name="bus_id_custom" placeholder="e.g. BUS01" autocomplete="new-password" required>
+                </div>
+                <div class="input-group">
+                    <label>Reg Number</label>
+                    <input type="text" id="regNumber" name="reg_num_custom" placeholder="e.g. KL 08 AB 1234" autocomplete="off" required>
+                </div>
+                <div class="input-group">
+                    <label>Route</label>
+                    <select id="route" required>
+                        <option value="THRISSUR">Thrissur Route</option>
+                        <option value="CHALAKUDY">Chalakudy Route</option>
+                        <option value="IRINJALAKUDA">Irinjalakuda Route</option>
+                        <option value="MANNUTHY">Mannuthy Route</option>
+                        <option value="ANGAMALY">Angamaly Route</option>
+                        <option value="KODUNGALLUR">Kodungallur Route</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Driver Name</label>
+                    <input type="text" id="driverName" name="driver_name_custom" placeholder="e.g. Santhosh" autocomplete="off" required>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <input type="password" id="password" name="bus_pwd_custom" placeholder="e.g. 1234" autocomplete="new-password" required>
+                </div>
+            </div>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Bus ID</th>
-                        <th>Reg Number</th>
-                        <th>Route</th>
-                        <th>Driver</th>
-                        <th>Live Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="busTableBody">
-                    <tr th:each="bus : ${buses}">
-                        <td th:text="${bus.busId}" style="font-weight: bold; color: #d4af37;">-</td>
-                        <td th:text="${bus.regNumber}">-</td>
-                        <td th:text="${bus.route}" style="color: #60a5fa;">-</td>
-                        <td th:text="${bus.driverName}">-</td>
-                        <td>
-                            <span th:if="${bus.status == 'ACTIVE'}" class="status-active"><i class="fa-solid fa-signal"></i> ACTIVE</span>
-                            <span th:if="${bus.status == 'BREAKDOWN'}" class="status-breakdown"><i class="fa-solid fa-triangle-exclamation"></i> BREAKDOWN</span>
-                            <span th:if="${bus.status == null || bus.status == 'INACTIVE'}" class="status-inactive"><i class="fa-solid fa-circle-pause"></i> INACTIVE</span>
-                        </td>
-                        <td>
-                            <button th:onclick="deleteBusAsync([[${bus.busId}]])" class="delete-btn">Remove</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="input-group" style="margin-top: 15px;">
+                <label style="color:#d4af37; font-size:13px; font-weight: bold;"><i class="fa-solid fa-map-location-dot"></i> Select Stops for this Bus (Tick all that apply):</label>
+                <div class="checkbox-grid">
+                    <label><input type="checkbox" name="stops" value="Thrissur Swaraj Round"> Thrissur Round</label>
+                    <label><input type="checkbox" name="stops" value="Ollur Junction"> Ollur</label>
+                    <label><input type="checkbox" name="stops" value="Amballur Junction"> Amballur</label>
+                    <label><input type="checkbox" name="stops" value="Puthukkad Bus Stop"> Puthukkad (NH 544)</label>
+                    <label><input type="checkbox" name="stops" value="Kodakara Junction"> Kodakara</label>
+                    <label><input type="checkbox" name="stops" value="Potta Junction"> Potta</label>
+                    <label><input type="checkbox" name="stops" value="Chalakudy Railway Station"> Chalakudy</label>
+                    <label><input type="checkbox" name="stops" value="Irinjalakuda Stand"> Irinjalakuda</label>
+                    <label><input type="checkbox" name="stops" value="Kallettumkara"> Kallettumkara</label>
+                    <label><input type="checkbox" name="stops" value="Mapranam"> Mapranam</label>
+                    <label><input type="checkbox" name="stops" value="Mannuthy"> Mannuthy</label>
+                    <label><input type="checkbox" name="stops" value="Angamaly"> Angamaly</label>
+                    <label><input type="checkbox" name="stops" value="Kodungallur"> Kodungallur</label>
+                    <label><input type="checkbox" name="stops" value="ICCS Campus" checked> ICCS Campus</label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn"><i class="fa-solid fa-plus-circle"></i> Add Bus & Assigned Stops</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Bus ID</th>
+                    <th>Route</th>
+                    <th>Driver</th>
+                    <th>Live Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="bus : ${buses}">
+                    <td th:text="${bus.busId}" style="font-weight: bold; color: #d4af37;">-</td>
+                    <td th:text="${bus.route}" style="color: #60a5fa;">-</td>
+                    <td th:text="${bus.driverName}">-</td>
+                    <td>
+                        <span th:if="${bus.status == 'ACTIVE'}" style="color: #4ade80; font-weight:bold;">ACTIVE</span>
+                        <span th:if="${bus.status == 'BREAKDOWN'}" style="color: #f59e0b; font-weight:bold;">BREAKDOWN</span>
+                        <span th:if="${bus.status == null || bus.status == 'INACTIVE'}" style="color: #f87171; font-weight:bold;">INACTIVE</span>
+                    </td>
+                    <td>
+                        <button th:onclick="deleteBusAsync([[${bus.busId}]])" class="delete-btn">Remove</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <script>
+        function checkAdminPassword() {
+            var pwd = document.getElementById("adminPasswordInput").value;
+            if (pwd === "admin123") {
+                document.getElementById("loginOverlay").style.display = "none";
+            } else {
+                document.getElementById("loginErr").style.display = "block";
+            }
+        }
+
         function addBusAsync(event) {
             event.preventDefault();
-
-            var busId = document.getElementById("busId").value.trim();
-            var regNumber = document.getElementById("regNumber").value.trim();
-            var route = document.getElementById("route").value;
-            var driverName = document.getElementById("driverName").value.trim();
-            var password = document.getElementById("password").value.trim();
-
             var params = new URLSearchParams();
-            params.append("busId", busId);
-            params.append("regNumber", regNumber);
-            params.append("route", route);
-            params.append("driverName", driverName);
-            params.append("password", password);
+            params.append("busId", document.getElementById("busId").value.trim());
+            params.append("regNumber", document.getElementById("regNumber").value.trim());
+            params.append("route", document.getElementById("route").value);
+            params.append("driverName", document.getElementById("driverName").value.trim());
+            params.append("password", document.getElementById("password").value.trim());
+
+            document.querySelectorAll('input[name="stops"]:checked').forEach(cb => {
+                params.append("stops", cb.value);
+            });
 
             fetch('/admin/addBus', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: params
-            })
-            .then(response => {
-                if(response.ok) {
-                    window.location.reload();
-                } else {
-                    alert("Failed to save bus.");
-                }
-            })
-            .catch(err => alert("Server error."));
+            }).then(response => {
+                if(response.ok) window.location.reload();
+            });
         }
 
         function deleteBusAsync(busId) {
             if(!confirm("Remove bus " + busId + "?")) return;
-
             var params = new URLSearchParams();
             params.append("busId", busId);
-
-            fetch('/admin/deleteBus', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            })
-            .then(res => {
-                if(res.ok) {
-                    window.location.reload();
-                }
-            });
+            fetch('/admin/deleteBus', { method: 'POST', body: params }).then(res => { if(res.ok) window.location.reload(); });
         }
-
-        // അഡ്മിൻ പാനലിൽ പേജ് റീഫ്രഷ് ചെയ്യാതെ തന്നെ ലൈവ് സ്റ്റാറ്റസ് ഓട്ടോ അപ്ഡേറ്റ് ചെയ്യാൻ 5 സെക്കൻഡ് പോളിംഗ്
-        setInterval(() => {
-            fetch('/admin')
-                .then(res => res.text())
-                .then(html => {
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(html, 'text/html');
-                    var newTable = doc.querySelector('tbody').innerHTML;
-                    document.querySelector('tbody').innerHTML = newTable;
-                })
-                .catch(e => {});
-        }, 5000);
     </script>
 </body>
 </html>

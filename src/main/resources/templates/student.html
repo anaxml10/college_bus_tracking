@@ -13,10 +13,9 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: #090d16; color: #fff; margin: 0; padding: 20px; }
-        .card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); padding: 25px; border-radius: 20px; max-width: 950px; margin: auto; border: 1px solid rgba(212, 175, 55, 0.3); position: relative; }
+        .card { background: rgba(30, 41, 59, 0.75); padding: 25px; border-radius: 20px; max-width: 950px; margin: auto; border: 1px solid rgba(212, 175, 55, 0.3); position: relative; }
         .home-btn { position: absolute; top: 20px; left: 20px; background: #d4af37; color: #000; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
         .header { text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 20px; }
-        .header h1 { color: #d4af37; margin: 0; font-size: 22px; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
         .box { background: rgba(15, 23, 42, 0.8); padding: 15px; border-radius: 12px; }
         select { width: 100%; padding: 10px; background: #090d16; color: #fff; border-radius: 8px; border: 1px solid #d4af37; margin-bottom: 10px; }
@@ -30,7 +29,7 @@
         <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
 
         <div class="header">
-            <h1><i class="fa-solid fa-bus"></i> STUDENT BUS TRACKING</h1>
+            <h1 style="color: #d4af37; margin: 0; font-size: 22px;"><i class="fa-solid fa-bus"></i> STUDENT BUS TRACKING</h1>
         </div>
 
         <div id="breakdownAlert" class="breakdown-banner">
@@ -41,14 +40,10 @@
             <div class="box">
                 <label style="color: #d4af37; font-weight: 600; display: block; margin-bottom: 6px;">Select Bus:</label>
                 <select id="busSelect" onchange="onBusChange()">
-                    <option th:each="bus : ${buses}" 
-                            th:value="${bus.busId}" 
-                            th:data-route="${bus.route}"
-                            th:text="${bus.busId + ' - (' + bus.route + ' Route)'}">
-                    </option>
+                    <option th:each="bus : ${buses}" th:value="${bus.busId}" th:text="${bus.busId + ' - (' + bus.route + ')'}"></option>
                 </select>
 
-                <label style="color: #d4af37; font-weight: 600; display: block; margin-bottom: 6px;">Boarding Stop:</label>
+                <label style="color: #d4af37; font-weight: 600; display: block; margin-bottom: 6px;">Your Boarding Stop:</label>
                 <select id="stopSelect" onchange="updateStopLocation()"></select>
             </div>
 
@@ -63,29 +58,23 @@
     </div>
 
     <script>
-       const routeStops = {
-    "THRISSUR": [
-        { name: "Thrissur Swaraj Round", coords: [10.5244, 76.2137] },
-        { name: "Ollur Junction", coords: [10.4704, 76.2335] },
-        { name: "Amballur Junction", coords: [10.4285, 76.2685] },
-        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, // ദേശീയപാതയിലെ (NH 544) കൃത്യം പുതൂക്കാട് ബസ് സ്റ്റോപ്പ്
-        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
-    ],
-    "CHALAKUDY": [
-        { name: "Chalakudy Railway Station", coords: [10.3072, 76.3353] },
-        { name: "Potta Junction", coords: [10.3288, 76.3262] },
-        { name: "Kodakara Junction", coords: [10.3662, 76.3082] },
-        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, // ദേശീയപാതയിലെ (NH 544) കൃത്യം പുതൂക്കാട് ബസ് സ്റ്റോപ്പ്
-        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
-    ],
-    "IRINJALAKUDA": [
-        { name: "Irinjalakuda Bus Stand", coords: [10.3421, 76.2148] },
-        { name: "Kallettumkara", coords: [10.3458, 76.2482] },
-        { name: "Mapranam", coords: [10.3685, 76.2312] },
-        { name: "Puthukkad Bus Stop", coords: [10.3528, 76.2818] }, 
-        { name: "ICCS College Campus", coords: [10.3391, 76.3051] }
-    ]
-};
+        const stopCoordinatesDB = {
+            "Thrissur Swaraj Round": [10.5244, 76.2137],
+            "Ollur Junction": [10.4704, 76.2335],
+            "Amballur Junction": [10.4395, 76.2625],
+            "Puthukkad Bus Stop": [10.4285, 76.2711], // NH 544
+            "Kodakara Junction": [10.3662, 76.3082],
+            "Potta Junction": [10.3288, 76.3262],
+            "Chalakudy Railway Station": [10.3072, 76.3353],
+            "Irinjalakuda Stand": [10.3421, 76.2148],
+            "Kallettumkara": [10.3458, 76.2482],
+            "Mapranam": [10.3685, 76.2312],
+            "Mannuthy": [10.5367, 76.2626],
+            "Angamaly": [10.1960, 76.3860],
+            "Kodungallur": [10.2227, 76.1979],
+            "ICCS Campus": [10.3391, 76.3051]
+        };
+
         var stopLat = 10.3528, stopLng = 76.2818;
         var map = L.map('map').setView([10.3528, 76.2818], 12);
         var initialCenteringDone = false;
@@ -99,21 +88,30 @@
             var busSelect = document.getElementById("busSelect");
             if (!busSelect || !busSelect.value) return;
 
-            var selectedOpt = busSelect.options[busSelect.selectedIndex];
-            var route = selectedOpt ? selectedOpt.getAttribute("data-route") : "THRISSUR";
-            
-            var stopSelect = document.getElementById("stopSelect");
-            stopSelect.innerHTML = "";
+            fetch('/api/busStops/' + busSelect.value)
+                .then(res => res.json())
+                .then(stops => {
+                    var stopSelect = document.getElementById("stopSelect");
+                    stopSelect.innerHTML = "";
 
-            (routeStops[route] || routeStops["THRISSUR"]).forEach(s => {
-                var opt = document.createElement("option");
-                opt.value = s.coords[0] + "," + s.coords[1];
-                opt.innerText = s.name;
-                stopSelect.appendChild(opt);
-            });
-
-            initialCenteringDone = false;
-            updateStopLocation();
+                    if(!stops || stops.length === 0) {
+                        var opt = document.createElement("option");
+                        opt.value = stopCoordinatesDB["ICCS Campus"].join(",");
+                        opt.innerText = "ICCS Campus";
+                        stopSelect.appendChild(opt);
+                    } else {
+                        stops.forEach(s => {
+                            if(stopCoordinatesDB[s]) {
+                                var opt = document.createElement("option");
+                                opt.value = stopCoordinatesDB[s][0] + "," + stopCoordinatesDB[s][1];
+                                opt.innerText = s;
+                                stopSelect.appendChild(opt);
+                            }
+                        });
+                    }
+                    initialCenteringDone = false;
+                    updateStopLocation();
+                }).catch(e => {});
         }
 
         function updateStopLocation() {
@@ -127,60 +125,44 @@
         }
 
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            var R = 6371;
-            var dLat = (lat2-lat1) * Math.PI / 180;
-            var dLon = (lon2-lon1) * Math.PI / 180;
-            var a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                    Math.sin(dLon/2) * Math.sin(dLon/2);
-            var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return R * c;
+            var R = 6371; var dLat = (lat2-lat1) * Math.PI / 180; var dLon = (lon2-lon1) * Math.PI / 180;
+            var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
         function trackBus() {
             var busSelect = document.getElementById("busSelect");
             if (!busSelect || !busSelect.value) return;
 
-            fetch('/api/bus/' + busSelect.value)
-                .then(res => res.json())
-                .then(data => {
-                    if(!data) return;
+            fetch('/api/bus/' + busSelect.value).then(res => res.json()).then(data => {
+                if(!data) return;
+                var bLat = data.latitude, bLng = data.longitude;
 
-                    var bLat = data.latitude;
-                    var bLng = data.longitude;
+                if (bLat && bLng && bLat !== 0) {
+                    busMarker.setLatLng([bLat, bLng]);
+                    if (!initialCenteringDone) { map.setView([bLat, bLng], 14); initialCenteringDone = true; }
+                }
 
-                    if (bLat && bLng && bLat !== 0) {
-                        busMarker.setLatLng([bLat, bLng]);
-
-                        // ഡ്രൈവറുടെ റിയൽ ലൈവ് ജിപിഎസ് ലൊക്കേഷനിലേക്ക് സ്ട്രൈറ്റ് ആയും കൃത്യമായും മാപ്പ് ഫോക്കസ് ചെയ്യുന്നു
-                        if (!initialCenteringDone) {
-                            map.setView([bLat, bLng], 14);
-                            initialCenteringDone = true;
-                        }
+                if(data.status === "BREAKDOWN") {
+                    document.getElementById("breakdownAlert").style.display = "block";
+                    document.getElementById("busStatus").innerHTML = "<span style='color:#ef4444;'>BREAKDOWN</span>";
+                    document.getElementById("eta").innerText = "Transit Delayed";
+                } else if(data.status === "ACTIVE") {
+                    document.getElementById("breakdownAlert").style.display = "none";
+                    document.getElementById("busStatus").innerHTML = "<span style='color:#4ade80;'>ACTIVE</span>";
+                    document.getElementById("busSpeed").innerText = (data.speed || 0).toFixed(1) + " km/h";
+                    if (bLat !== 0 && bLng !== 0) {
+                        var dist = calculateDistance(bLat, bLng, stopLat, stopLng);
+                        var speed = data.speed > 5 ? data.speed : 30;
+                        var mins = Math.round((dist / speed) * 60);
+                        document.getElementById("eta").innerText = dist < 0.2 ? "Arrived at Stop" : mins + " mins (" + dist.toFixed(1) + " km)";
                     }
-
-                    if(data.status === "BREAKDOWN") {
-                        document.getElementById("breakdownAlert").style.display = "block";
-                        document.getElementById("busStatus").innerHTML = "<span style='color:#ef4444;'>BREAKDOWN</span>";
-                        document.getElementById("eta").innerText = "Transit Delayed";
-                    } else if(data.status === "ACTIVE") {
-                        document.getElementById("breakdownAlert").style.display = "none";
-                        document.getElementById("busStatus").innerHTML = "<span style='color:#4ade80;'>ACTIVE</span>";
-                        document.getElementById("busSpeed").innerText = (data.speed || 0).toFixed(1) + " km/h";
-
-                        if (bLat !== 0 && bLng !== 0) {
-                            var dist = calculateDistance(bLat, bLng, stopLat, stopLng);
-                            var speed = data.speed > 5 ? data.speed : 30;
-                            var mins = Math.round((dist / speed) * 60);
-                            document.getElementById("eta").innerText = dist < 0.2 ? "Arrived at Stop" : mins + " mins (" + dist.toFixed(1) + " km)";
-                        }
-                    } else {
-                        document.getElementById("breakdownAlert").style.display = "none";
-                        document.getElementById("busStatus").innerHTML = "<span style='color:#f87171;'>INACTIVE</span>";
-                        document.getElementById("eta").innerText = "Trip Not Started";
-                    }
-                })
-                .catch(err => console.log(err));
+                } else {
+                    document.getElementById("breakdownAlert").style.display = "none";
+                    document.getElementById("busStatus").innerHTML = "<span style='color:#f87171;'>INACTIVE</span>";
+                    document.getElementById("eta").innerText = "Trip Not Started";
+                }
+            }).catch(e => {});
         }
 
         onBusChange();

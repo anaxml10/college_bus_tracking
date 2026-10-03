@@ -30,4 +30,12 @@ public class StudentController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    // അഡ്മിൻ ടിക്ക് ചെയ്ത സ്റ്റോപ്പുകൾ സ്റ്റുഡന്റ് പാനലിലേക്ക് അയക്കാൻ
+    @GetMapping("/api/busStops/{busId}")
+    @ResponseBody
+    public ResponseEntity<List<String>> getBusStops(@PathVariable String busId) {
+        List<String> stops = AdminController.busStopsMap.get(busId);
+        return ResponseEntity.ok(stops != null ? stops : new ArrayList<>());
+    }
 }
