@@ -26,10 +26,17 @@
         .checkbox-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #0f172a; padding: 15px; border-radius: 8px; border: 1px solid #d4af37; }
         .checkbox-grid label { font-size: 13px; font-weight: normal; color: white; cursor: pointer; }
         .submit-btn { background: #10b981; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 22px; }
-        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 30px; }
-        th { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 16px; font-size: 13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
-        td { padding: 16px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .delete-btn { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+        
+        /* Table Section Styles */
+        .table-section { margin-top: 40px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; display: block; }
+        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px; }
+        .total-badge { background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 8px 15px; border-radius: 8px; font-weight: bold; font-size: 14px; border: 1px solid rgba(16, 185, 129, 0.4); }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background: rgba(212, 175, 55, 0.1); color: #d4af37; padding: 15px; font-size: 13px; border-bottom: 1px solid rgba(212, 175, 55, 0.2); }
+        td { padding: 15px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .delete-btn { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+        .delete-btn:hover { background: #ef4444; color: white; }
     </style>
 </head>
 <body>
@@ -105,32 +112,54 @@
             <button type="submit" class="submit-btn"><i class="fa-solid fa-plus-circle"></i> Add Bus & Assigned Stops</button>
         </form>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Bus ID</th>
-                    <th>Route</th>
-                    <th>Driver</th>
-                    <th>Live Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="bus : ${buses}">
-                    <td th:text="${bus.busId}" style="font-weight: bold; color: #d4af37;">-</td>
-                    <td th:text="${bus.route}" style="color: #60a5fa;">-</td>
-                    <td th:text="${bus.driverName}">-</td>
-                    <td>
-                        <span th:if="${bus.status == 'ACTIVE'}" style="color: #4ade80; font-weight:bold;">ACTIVE</span>
-                        <span th:if="${bus.status == 'BREAKDOWN'}" style="color: #f59e0b; font-weight:bold;">BREAKDOWN</span>
-                        <span th:if="${bus.status == null || bus.status == 'INACTIVE'}" style="color: #f87171; font-weight:bold;">INACTIVE</span>
-                    </td>
-                    <td>
-                        <button th:onclick="deleteBusAsync([[${bus.busId}]])" class="delete-btn">Remove</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- New Bus Details Table Section (Thymeleaf Fixed) -->
+        <div class="table-section">
+            <div class="table-header">
+                <h2 style="color: #fff; margin: 0; font-size: 18px;"><i class="fa-solid fa-list-check"></i> Registered Buses Details</h2>
+                <div class="total-badge">
+                    Total Buses: <span th:text="${#lists.size(buses)}">0</span>
+                </div>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Bus ID</th>
+                            <th>Reg Number</th>
+                            <th>Route</th>
+                            <th>Driver Name</th>
+                            <th>Live Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- If no buses are added -->
+                        <tr th:if="${#lists.isEmpty(buses)}">
+                            <td colspan="6" style="text-align: center; color: #94a3b8; padding: 30px;">
+                                <i class="fa-solid fa-bus-simple" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                                No buses added to the system yet.
+                            </td>
+                        </tr>
+                        <!-- Bus Details -->
+                        <tr th:each="bus : ${buses}">
+                            <td th:text="${bus.busId}" style="font-weight: bold; color: #d4af37;">-</td>
+                            <td th:text="${bus.regNumber}">-</td>
+                            <td th:text="${bus.route}" style="color: #60a5fa; font-weight: 600;">-</td>
+                            <td th:text="${bus.driverName}">-</td>
+                            <td>
+                                <span th:if="${bus.status == 'ACTIVE'}" style="color: #4ade80; font-weight:bold;"><i class="fa-solid fa-signal"></i> ACTIVE</span>
+                                <span th:if="${bus.status == 'BREAKDOWN'}" style="color: #f59e0b; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation"></i> BREAKDOWN</span>
+                                <span th:if="${bus.status == null || bus.status == 'INACTIVE'}" style="color: #f87171; font-weight:bold;"><i class="fa-solid fa-circle-pause"></i> INACTIVE</span>
+                            </td>
+                            <td>
+                                <button th:onclick="deleteBusAsync([[${bus.busId}]])" class="delete-btn"><i class="fa-solid fa-trash"></i> Remove</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -166,7 +195,7 @@
         }
 
         function deleteBusAsync(busId) {
-            if(!confirm("Remove bus " + busId + "?")) return;
+            if(!confirm("Are you sure you want to remove Bus " + busId + "?")) return;
             var params = new URLSearchParams();
             params.append("busId", busId);
             fetch('/admin/deleteBus', { method: 'POST', body: params }).then(res => { if(res.ok) window.location.reload(); });
