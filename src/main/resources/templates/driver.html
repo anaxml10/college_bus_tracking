@@ -29,7 +29,6 @@
 
         .status-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #d4af37; margin-bottom: 20px; text-align: center; }
 
-        /* SOS Modal Popup */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.95); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
         .modal-box { background: #1e293b; border: 2px solid #ef4444; padding: 25px; border-radius: 16px; width: 90%; max-width: 380px; text-align: center; }
         .modal-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; font-size: 14px; }
@@ -56,7 +55,6 @@
             <input type="password" id="driverPassword" placeholder="Enter Password">
         </div>
 
-        <!-- NEW: Assigned Bus Stops Display Box -->
         <div class="stops-box">
             <div style="font-size: 13px; font-weight: bold; color: #d4af37;"><i class="fa-solid fa-route"></i> Assigned Stops for this Bus:</div>
             <ol id="driverStopsList" class="stops-list">
@@ -76,7 +74,6 @@
         <button onclick="sendAlert('ACTIVE')" class="btn btn-clear"><i class="fa-solid fa-check-circle"></i> ✅ RESTORE NORMAL STATUS</button>
     </div>
 
-    <!-- SOS Modal Box -->
     <div id="sosModal" class="modal-overlay">
         <div class="modal-box">
             <h3 style="color: #ef4444; margin-top: 0;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY SOS ALERT</h3>
@@ -138,12 +135,16 @@
                     params.append("latitude", lat);
                     params.append("longitude", lng);
                     params.append("speed", spd);
-                    params.append("status", "ACTIVE");
 
-                    fetch('/driver/updateLocation', { method: 'POST', body: params });
+                    // FIXED URL: Correct API path matching DriverController.java
+                    fetch('/api/driver/updateLocation', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: params 
+                    });
 
                 }, function(err) {
-                    alert("GPS Error: Please enable location services.");
+                    alert("GPS Error: Please enable location services in your browser.");
                 }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
 
                 document.getElementById("startBtn").style.display = "none";
@@ -159,9 +160,12 @@
             
             var params = new URLSearchParams();
             params.append("busId", busId);
-            params.append("status", "INACTIVE");
 
-            fetch('/api/bus/updateAlert', { method: 'POST', body: params }).then(res => {
+            fetch('/api/driver/endTrip', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params 
+            }).then(res => {
                 document.getElementById("gpsStatusText").innerText = "OFFLINE";
                 document.getElementById("gpsStatusText").style.color = "#f87171";
                 document.getElementById("speedText").innerText = "0.0 km/h";
@@ -176,7 +180,11 @@
             params.append("busId", busId);
             params.append("status", alertType);
 
-            fetch('/api/bus/updateAlert', { method: 'POST', body: params }).then(res => {
+            fetch('/api/bus/updateAlert', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params 
+            }).then(res => {
                 if(res.ok) {
                     alert("Status Updated: " + alertType);
                     closeSosModal();
@@ -184,7 +192,6 @@
             });
         }
 
-        // Auto load stops on page open
         fetchAssignedStops();
     </script>
 </body>
