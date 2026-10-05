@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>ICCS Driver Console</title>
+    <title>ICCS Driver Telemetry Console</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -9,161 +9,183 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: #090d16; color: #fff; margin: 0; padding: 20px; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .card { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); padding: 30px; border-radius: 20px; max-width: 500px; width: 100%; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+        body { background: #090d16; color: #fff; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .card { background: rgba(30, 41, 59, 0.85); padding: 30px; border-radius: 20px; width: 100%; max-width: 480px; border: 1px solid rgba(212, 175, 55, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.6); position: relative; }
+        .home-btn { position: absolute; top: 20px; left: 20px; background: #d4af37; color: #000; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; }
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; }
         
-        .top-bar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 20px; }
-        .home-btn { background: linear-gradient(135deg, #d4af37, #f59e0b); color: #000; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 6px; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; background: #090d16; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+        
+        .stops-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px dashed #d4af37; margin-bottom: 20px; }
+        .stops-list { margin: 8px 0 0 0; padding-left: 20px; font-size: 13px; color: #60a5fa; line-height: 1.6; }
 
-        .header h1 { color: #d4af37; font-size: 18px; font-weight: 800; margin: 0; }
+        .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-weight: bold; font-size: 15px; cursor: pointer; margin-bottom: 12px; transition: 0.3s; }
+        .btn-start { background: #10b981; color: white; }
+        .btn-stop { background: #ef4444; color: white; display: none; }
+        .btn-sos { background: #f59e0b; color: #000; }
+        .btn-clear { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid #10b981; }
 
-        .form-group { margin-bottom: 15px; }
-        label { font-size: 13px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px; }
-        select, input { width: 100%; padding: 12px; background: #090d16; border: 1px solid rgba(212,175,55,0.4); border-radius: 8px; color: #fff; font-size: 14px; outline: none; }
+        .status-box { background: #0f172a; padding: 15px; border-radius: 10px; border: 1px solid #d4af37; margin-bottom: 20px; text-align: center; }
 
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 8px; }
-        .btn-start { background: #10b981; color: #fff; }
-        .btn-breakdown { background: #ef4444; color: #fff; }
-        .btn-reset { background: #f59e0b; color: #000; margin-top: 8px; }
-        .btn-stop { background: #64748b; color: #fff; margin-top: 8px; }
-
-        .status-box { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px; text-align: center; }
-        #statusMsg { font-size: 13px; font-weight: 600; margin-top: 8px; }
+        /* SOS Modal Popup */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.95); backdrop-filter: blur(8px); z-index: 9999; display: none; justify-content: center; align-items: center; }
+        .modal-box { background: #1e293b; border: 2px solid #ef4444; padding: 25px; border-radius: 16px; width: 90%; max-width: 380px; text-align: center; }
+        .modal-btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="top-bar">
-            <div class="header">
-                <h1>DRIVER CONSOLE</h1>
-            </div>
-            <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/" class="home-btn"><i class="fa-solid fa-house"></i> Home</a>
+
+        <div class="header">
+            <h2 style="color: #d4af37; margin: 0; font-size: 20px; margin-top: 20px;"><i class="fa-solid fa-id-card"></i> DRIVER CONSOLE</h2>
         </div>
 
-        <form id="driverLoginForm" onsubmit="startTrip(event)">
-            <div class="form-group">
-                <label><i class="fa-solid fa-bus"></i> Select Bus</label>
-                <select id="busSelect" required>
-                    <option th:each="b : ${buses}" th:value="${b.busId}" th:text="${b.busId + ' - ' + b.driverName}"></option>
-                </select>
-            </div>
+        <div class="input-group">
+            <label>Select Your Assigned Bus:</label>
+            <select id="driverBusId" onchange="fetchAssignedStops()">
+                <option th:each="bus : ${buses}" th:value="${bus.busId}" th:text="${bus.busId + ' - ' + bus.driverName + ' (' + bus.route + ')'}"></option>
+            </select>
+        </div>
 
-            <div class="form-group">
-                <label><i class="fa-solid fa-key"></i> Password</label>
-                <input type="password" id="password" placeholder="Enter password" required>
-            </div>
+        <div class="input-group">
+            <label>Driver Access Password:</label>
+            <input type="password" id="driverPassword" placeholder="Enter Password">
+        </div>
 
-            <button type="submit" class="btn btn-start"><i class="fa-solid fa-location-arrow"></i> START TRIP & GPS</button>
-        </form>
-
-        <div id="controls" style="display: none;">
-            <button onclick="reportBreakdown()" class="btn btn-breakdown"><i class="fa-solid fa-triangle-exclamation"></i> REPORT BREAKDOWN</button>
-            <button onclick="resetStatus()" class="btn btn-reset"><i class="fa-solid fa-rotate-left"></i> CLEAR BREAKDOWN (RESET NORMAL)</button>
-            <button onclick="endTrip()" class="btn btn-stop"><i class="fa-solid fa-circle-stop"></i> END TRIP</button>
+        <!-- NEW: Assigned Bus Stops Display Box -->
+        <div class="stops-box">
+            <div style="font-size: 13px; font-weight: bold; color: #d4af37;"><i class="fa-solid fa-route"></i> Assigned Stops for this Bus:</div>
+            <ol id="driverStopsList" class="stops-list">
+                <li>Select a bus to view stops...</li>
+            </ol>
         </div>
 
         <div class="status-box">
-            <div style="font-size: 12px; color: #94a3b8;">GPS TRANSMISSION STATUS</div>
-            <div id="statusMsg" style="color: #f87171;"><i class="fa-solid fa-circle-pause"></i> STANDBY</div>
+            <div>GPS Status: <b id="gpsStatusText" style="color: #f87171;">OFFLINE</b></div>
+            <div style="margin-top: 5px;">Current Speed: <b id="speedText" style="color: #60a5fa;">0.0 km/h</b></div>
+        </div>
+
+        <button id="startBtn" onclick="startTrip()" class="btn btn-start"><i class="fa-solid fa-play"></i> START TRIP & BROADCAST GPS</button>
+        <button id="stopBtn" onclick="stopTrip()" class="btn btn-stop"><i class="fa-solid fa-stop"></i> END TRIP</button>
+        
+        <button onclick="openSosModal()" class="btn btn-sos"><i class="fa-solid fa-triangle-exclamation"></i> 🚨 BROADCAST SOS ALERT</button>
+        <button onclick="sendAlert('ACTIVE')" class="btn btn-clear"><i class="fa-solid fa-check-circle"></i> ✅ RESTORE NORMAL STATUS</button>
+    </div>
+
+    <!-- SOS Modal Box -->
+    <div id="sosModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color: #ef4444; margin-top: 0;"><i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY SOS ALERT</h3>
+            <p style="font-size: 13px; color: #cbd5e1;">Select the issue to notify students:</p>
+            
+            <button onclick="sendAlert('BREAKDOWN')" class="modal-btn" style="background: #ef4444; color: #fff;">🛠️ Vehicle Breakdown</button>
+            <button onclick="sendAlert('TRAFFIC')" class="modal-btn" style="background: #f97316; color: #fff;">🚦 Heavy Traffic Block</button>
+            <button onclick="sendAlert('RAIN')" class="modal-btn" style="background: #0284c7; color: #fff;">🌧️ Heavy Rain Delay</button>
+            
+            <button onclick="closeSosModal()" class="modal-btn" style="background: #475569; color: #fff; margin-bottom: 0;">Cancel</button>
         </div>
     </div>
 
     <script>
         var watchId = null;
-        var activeBusId = null;
 
-        function startTrip(event) {
-            event.preventDefault();
-            activeBusId = document.getElementById("busSelect").value;
-            var password = document.getElementById("password").value;
+        function fetchAssignedStops() {
+            var busId = document.getElementById("driverBusId").value;
+            if(!busId) return;
 
+            fetch('/api/busStops/' + busId)
+                .then(res => res.json())
+                .then(stops => {
+                    var listElem = document.getElementById("driverStopsList");
+                    listElem.innerHTML = "";
+                    if (!stops || stops.length === 0) {
+                        listElem.innerHTML = "<li style='color:#94a3b8;'>No specific stops assigned by Admin.</li>";
+                    } else {
+                        stops.forEach(s => {
+                            var li = document.createElement("li");
+                            li.innerText = s;
+                            listElem.appendChild(li);
+                        });
+                    }
+                }).catch(e => {});
+        }
+
+        function openSosModal() { document.getElementById("sosModal").style.display = "flex"; }
+        function closeSosModal() { document.getElementById("sosModal").style.display = "none"; }
+
+        function startTrip() {
+            var busId = document.getElementById("driverBusId").value;
+            var pwd = document.getElementById("driverPassword").value;
+
+            if(!pwd) { alert("Please enter your password!"); return; }
+
+            if ("geolocation" in navigator) {
+                watchId = navigator.geolocation.watchPosition(function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lng = pos.coords.longitude;
+                    var spd = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+
+                    document.getElementById("gpsStatusText").innerText = "BROADCASTING LIVE";
+                    document.getElementById("gpsStatusText").style.color = "#4ade80";
+                    document.getElementById("speedText").innerText = spd.toFixed(1) + " km/h";
+
+                    var params = new URLSearchParams();
+                    params.append("busId", busId);
+                    params.append("latitude", lat);
+                    params.append("longitude", lng);
+                    params.append("speed", spd);
+                    params.append("status", "ACTIVE");
+
+                    fetch('/driver/updateLocation', { method: 'POST', body: params });
+
+                }, function(err) {
+                    alert("GPS Error: Please enable location services.");
+                }, { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
+
+                document.getElementById("startBtn").style.display = "none";
+                document.getElementById("stopBtn").style.display = "block";
+            } else {
+                alert("Geolocation is not supported by your browser.");
+            }
+        }
+
+        function stopTrip() {
+            if(watchId) navigator.geolocation.clearWatch(watchId);
+            var busId = document.getElementById("driverBusId").value;
+            
             var params = new URLSearchParams();
-            params.append("busId", activeBusId);
-            params.append("password", password);
+            params.append("busId", busId);
+            params.append("status", "INACTIVE");
 
-            fetch('/api/driver/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            })
-            .then(res => {
+            fetch('/api/bus/updateAlert', { method: 'POST', body: params }).then(res => {
+                document.getElementById("gpsStatusText").innerText = "OFFLINE";
+                document.getElementById("gpsStatusText").style.color = "#f87171";
+                document.getElementById("speedText").innerText = "0.0 km/h";
+                document.getElementById("startBtn").style.display = "block";
+                document.getElementById("stopBtn").style.display = "none";
+            });
+        }
+
+        function sendAlert(alertType) {
+            var busId = document.getElementById("driverBusId").value;
+            var params = new URLSearchParams();
+            params.append("busId", busId);
+            params.append("status", alertType);
+
+            fetch('/api/bus/updateAlert', { method: 'POST', body: params }).then(res => {
                 if(res.ok) {
-                    document.getElementById("driverLoginForm").style.display = "none";
-                    document.getElementById("controls").style.display = "block";
-                    document.getElementById("statusMsg").style.color = "#34d399";
-                    document.getElementById("statusMsg").innerHTML = `<i class="fa-solid fa-satellite-dish"></i> LIVE GPS TRANSMITTING`;
-
-                    startGPSBroadcast();
-                } else {
-                    alert("Invalid Driver Password!");
+                    alert("Status Updated: " + alertType);
+                    closeSosModal();
                 }
             });
         }
 
-        function startGPSBroadcast() {
-            if ("geolocation" in navigator) {
-                watchId = navigator.geolocation.watchPosition(sendLocation, err => console.log(err), { enableHighAccuracy: true });
-            }
-        }
-
-        function sendLocation(position) {
-            var params = new URLSearchParams();
-            params.append("busId", activeBusId);
-            params.append("latitude", position.coords.latitude);
-            params.append("longitude", position.coords.longitude);
-            params.append("speed", position.coords.speed ? (position.coords.speed * 3.6) : 0);
-
-            fetch('/api/driver/updateLocation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            });
-        }
-
-        function reportBreakdown() {
-            if(!confirm("Report Vehicle Breakdown to Students?")) return;
-            var params = new URLSearchParams();
-            params.append("busId", activeBusId);
-
-            fetch('/api/driver/reportBreakdown', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            }).then(() => {
-                document.getElementById("statusMsg").style.color = "#f87171";
-                document.getElementById("statusMsg").innerText = "BREAKDOWN REPORTED TO STUDENTS";
-            });
-        }
-
-        function resetStatus() {
-            var params = new URLSearchParams();
-            params.append("busId", activeBusId);
-            params.append("latitude", 0);
-            params.append("longitude", 0);
-            params.append("speed", 0);
-
-            fetch('/api/driver/updateLocation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            }).then(() => {
-                document.getElementById("statusMsg").style.color = "#34d399";
-                document.getElementById("statusMsg").innerText = "STATUS RESET TO NORMAL (ACTIVE)";
-            });
-        }
-
-        function endTrip() {
-            if(watchId) navigator.geolocation.clearWatch(watchId);
-            var params = new URLSearchParams();
-            params.append("busId", activeBusId);
-
-            fetch('/api/driver/endTrip', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params
-            }).then(() => location.reload());
-        }
+        // Auto load stops on page open
+        fetchAssignedStops();
     </script>
 </body>
 </html>
