@@ -1,0 +1,38 @@
+2026-10-10 13:43:22 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM LOCATION_UPDATE \000d\000aSHOW [*]TABLE"; SQL statement:
+SELECT * FROM LOCATION_UPDATE 
+SHOW TABLE [42000-214]
+2026-10-10 13:43:28 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SHOW [*]TABLE"; SQL statement:
+SHOW TABLE [42000-214]
+2026-10-10 14:04:42 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "SELECT * FROM LOCATION_UPDATE \000d\000a[*]SELECT * FROM BUS"; SQL statement:
+SELECT * FROM LOCATION_UPDATE 
+SELECT * FROM BUS [42000-214]
+2026-10-10 14:04:48 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:49 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:50 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:50 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:50 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:50 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:51 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:04:51 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]
+2026-10-10 14:05:43 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "BUS" not found; SQL statement:
+SELECT * FROM BUS [42102-214]

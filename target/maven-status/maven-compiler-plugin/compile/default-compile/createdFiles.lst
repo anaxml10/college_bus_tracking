@@ -4,6 +4,9 @@ com/iccs/bustracking/controller/StudentController.class
 com/iccs/bustracking/model/Bus.class
 com/iccs/bustracking/model/LocationUpdate.class
 com/iccs/bustracking/service/TrackingService.class
+com/iccs/bustracking/repository/BusRepository.class
+com/iccs/bustracking/repository/StudentRepository.class
 com/iccs/bustracking/controller/AdminController.class
 com/iccs/bustracking/model/Route.class
+com/iccs/bustracking/model/Student.class
 com/iccs/bustracking/BusTrackingApplication.class

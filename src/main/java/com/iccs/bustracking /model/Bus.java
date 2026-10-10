@@ -1,12 +1,19 @@
 package com.iccs.bustracking.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+@Entity
+@Table(name = "BUS")
+
 public class Bus {
+    @Id
     private String busId;
     private String driverName;
     private String password;
     private String regNumber;
     private String route;
-    private double latitude = 0.0;  // വെറുതെ തൃശ്ശൂർ കാണിക്കാതിരിക്കാൻ 0 നൽകുന്നു
+    private double latitude = 0.0;  
     private double longitude = 0.0;
     private double speed = 0.0;
     private String status = "INACTIVE";
